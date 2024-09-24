@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronômetro</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            background-color: wheat;
+            overflow: hidden; 
+            
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            z-index: -1;
+        }
+
+        .image {
+            width: 50px; 
+            height: 50px;
+            background-size: cover;
+            margin: 10px; 
+            animation: spin 10s linear infinite; 
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color:darkblue;
+            font-weight: bold;
+            font-size:45px;
+        }
+
+        .form-group {
+            text-align: center; 
+            margin: 10px 0; 
+        }
+
+        .label {
+            font-size: 23px;
+            color:black;
+            font-weight: bold;
+        }
+
+        input {
+            width: 200px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #timer-display {
+            font-size: 70px;
+            margin: 5px 0;
+            color:darkblue;
+            height:50px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center; /* Centraliza os botões */
+            margin-top: 20px;
+        }
+        .greetingDisplay{
+            color:darkblue;
+        }
+        .userName{
+            color:darkblue;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Pomodoro Timer Personalizado</h1>
+
+<div class="form-group">
+    <label class="label" for="user-name">Digite seu nome:</label>
+    <input type="text" id="user-name" placeholder="Nome">
+</div>
+
+<div class="form-group">
+    <label class="label" for="pomodoro-name">Nome do Pomodoro:</label>
+    <input type="text" id="pomodoro-name" placeholder="Nome do Pomodoro">
+</div>
+
+<div class="form-group">
+    <label class="label" for="next-timer-name">Nome do Próximo Timer:</label>
+    <input type="text" id="next-timer-name" placeholder="Nome do Próximo Timer">
+</div>
+
+<div class="form-group">
+    <label class="label" for="timer-duration">Escolha o tempo do Pomodoro (minutos):</label>
+    <input type="number" id="timer-duration" placeholder="Tempo em minutos" value="25">
+</div>
+
+<div class="form-group">
+    <label class="label" for="next-timer-duration">Escolha o tempo do próximo timer (minutos):</label>
+    <input type="number" id="next-timer-duration" placeholder="Tempo do próximo timer" value="5">
+</div>
+
+<h2 id="greeting"></h2>
+<h3 id="timer-title"></h3>
+<div id="timer-display">25:00</div>
+
+<div class="buttons">
+    <button id="start-btn" class="btn">Iniciar</button>
+    <button id="pause-btn" class="btn">Pausar</button>
+    <button id="reset-btn" class="btn">Resetar</button>
+    <button id="resume-btn" class="btn">Voltar ao Timer</button>
+</div>
+
+<script>
+   
+    let remainingTime, pomodoroDuration, nextTimerDuration;
+    let interval = null;
+    let isPaused = false;
+    let isNextTimer = false;
+
+    const timerDisplay = document.getElementById('timer-display');
+    const startButton = document.getElementById('start-btn');
+    const pauseButton = document.getElementById('pause-btn');
+    const resetButton = document.getElementById('reset-btn');
+    const resumeButton = document.getElementById('resume-btn');
+    const userNameInput = document.getElementById('user-name');
+    const pomodoroNameInput = document.getElementById('pomodoro-name');
+    const nextTimerNameInput = document.getElementById('next-timer-name');
+    const timerDurationInput = document.getElementById('timer-duration');
+    const nextTimerDurationInput = document.getElementById('next-timer-duration');
+    const greetingDisplay = document.getElementById('greeting');
+    const timerTitleDisplay = document.getElementById('timer-title');
+
+    function updateDisplay(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+
+    function startTimer() {
+        if (!interval) {
+            if (!isNextTimer) {
+                pomodoroDuration = parseInt(timerDurationInput.value) * 60;
+                remainingTime = pomodoroDuration;
+            } else {
+                nextTimerDuration = parseInt(nextTimerDurationInput.value) * 60;
+                remainingTime = nextTimerDuration;
+            }
+            runTimer();
+        }
+    }
+
+    function runTimer() {
+        interval = setInterval(() => {
+            if (remainingTime > 0) {
+                remainingTime--;
+                updateDisplay(remainingTime);
+            } else {
+                clearInterval(interval);
+                alert(isNextTimer ? "Intervalo concluído!" : "Pomodoro concluído!");
+                isNextTimer = !isNextTimer;
+                startTimer(); 
+            }
+        }, 1000);
+    }
+
+    function pauseTimer() {
+        clearInterval(interval);
+        interval = null;
+        isPaused = true;
+    }
+
+    function resetTimer() {
+        clearInterval(interval);
+        interval = null;
+        isPaused = false;
+        isNextTimer = false;
+        updateDisplay(timerDurationInput.value * 60); 
+    }
+
+    function resumePreviousTimer() {
+        if (isPaused) {
+            startTimer();
+        } else {
+            alert("O timer não está pausado.");
+        }
+    }
+
+    function saveUserSettings() {
+        const userName = userNameInput.value;
+        const pomodoroName = pomodoroNameInput.value;
+        const nextTimerName = nextTimerNameInput.value;
+        greetingDisplay.textContent = `Olá, ${userName}!`;
+        timerTitleDisplay.textContent = !isNextTimer ? pomodoroName : nextTimerName;
+    }
+
+    startButton.addEventListener('click', () => {
+        saveUserSettings();
+        startTimer();
+    });
+    pauseButton.addEventListener('click', pauseTimer);
+    resetButton.addEventListener('click', resetTimer);
+    resumeButton.addEventListener('click', resumePreviousTimer);
+    timerDurationInput.addEventListener('change', () => updateDisplay(timerDurationInput.value * 60));
+    nextTimerDurationInput.addEventListener('change', () => updateDisplay(nextTimerDurationInput.value * 60));
+
+   
+    updateDisplay(timerDurationInput.value * 60);
+</script>
+
+</body>
+</html>
